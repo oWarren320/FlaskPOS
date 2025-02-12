@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block sidebar %}
+<!-- Empty block to prevent sidebar from rendering on login page -->
+{% endblock %}
+
+{% block content %}
+    <div class="flex items-center justify-center min-h-screen bg-gray-100">
+        <div class="bg-white p-8 rounded-lg shadow-lg w-96">
+            <h1 class="text-3xl mb-4 text-center font-bold">Login</h1>
+            <form method="POST" action="{{ url_for('login') }}">
+                <label for="username" class="block mb-2">Username</label>
+                <input type="text" name="username" id="username" class="border p-2 w-full mb-4 rounded" required>
+
+                <label for="pin" class="block mb-2">PIN</label>
+                <input type="password" name="pin" id="pin" class="border p-2 w-full mb-4 rounded" required>
+
+                <button type="submit" class="bg-blue-500 text-white p-2 w-full rounded hover:bg-blue-600">Login</button>
+
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        <div class="mt-4 text-red-500">
+                            {% for category, message in messages %}
+                                <p>{{ message }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                {% endwith %}
+            </form>
+        </div>
+    </div>
+{% endblock %}

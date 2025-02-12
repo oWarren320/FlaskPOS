@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="flex min-h-screen">
+    <!-- Sidebar -->
+    <div class="w-64 bg-blue-800 text-white p-4 flex flex-col">
+        <h2 class="text-2xl font-semibold mb-6">Admin Dashboard</h2>
+        <ul class="space-y-4">
+            <li><a href="{{ url_for('admin_dashboard') }}" class="hover:bg-blue-700 px-4 py-2 rounded block">Dashboard</a></li>
+            <li><a href="{{ url_for('manage_users') }}" class="hover:bg-blue-700 px-4 py-2 rounded block">Manage Users</a></li>
+            <li><a href="{{ url_for('view_stock') }}" class="hover:bg-blue-700 px-4 py-2 rounded block">View Stock</a></li>
+            <li><a href="{{ url_for('approve_stock') }}" class="hover:bg-blue-700 px-4 py-2 rounded block">Approve Stock</a></li>
+            <li><a href="{{ url_for('view_sales_report') }}" class="hover:bg-blue-700 px-4 py-2 rounded block">Sales Report</a></li>
+            <li><a href="{{ url_for('logout') }}" class="hover:bg-blue-700 px-4 py-2 rounded block">Logout</a></li>
+        </ul>
+    </div>
+
+    <!-- Main Content -->
+    <div class="flex-1 p-6">
+        <h1 class="text-3xl mb-4">Sales Report</h1>
+
+        <!-- Date Range Filter -->
+        <form method="GET" action="{{ url_for('view_sales_report') }}" class="mb-6">
+            <div class="flex space-x-4">
+                <input type="date" name="start_date" class="p-2 border rounded" value="{{ start_date }}">
+                <input type="date" name="end_date" class="p-2 border rounded" value="{{ end_date }}">
+                <button type="submit" class="bg-blue-500 text-white p-2 rounded">Filter</button>
+            </div>
+        </form>
+
+        <!-- Total Sales -->
+        <div class="bg-white p-4 rounded shadow-md mb-6">
+            <h2 class="text-xl font-semibold mb-2">Total Sales</h2>
+            <p class="text-2xl font-bold">KSH {{ total_sales }}</p>
+        </div>
+
+        <!-- Sales by Product -->
+        <div class="bg-white p-4 rounded shadow-md mb-6">
+            <h2 class="text-xl font-semibold mb-4">Sales by Product</h2>
+            <table class="w-full border border-gray-300">
+                <thead class="bg-gray-100">
+                    <tr>
+                        <th class="border p-2">Product</th>
+                        <th class="border p-2">Quantity Sold</th>
+                        <th class="border p-2">Total Sales</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for product in sales_by_product %}
+                        <tr>
+                            <td class="border p-2">{{ product.product_name }}</td>
+                            <td class="border p-2">{{ product.total_quantity }}</td>
+                            <td class="border p-2">KSH {{ product.total_sales }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Sales by Payment Type -->
+        <div class="bg-white p-4 rounded shadow-md">
+            <h2 class="text-xl font-semibold mb-4">Sales by Payment Type</h2>
+            <table class="w-full border border-gray-300">
+                <thead class="bg-gray-100">
+                    <tr>
+                        <th class="border p-2">Payment Type</th>
+                        <th class="border p-2">Total Sales</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for payment in sales_by_payment_type %}
+                        <tr>
+                            <td class="border p-2">{{ payment.payment_type }}</td>
+                            <td class="border p-2">KSH {{ payment.total_sales }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

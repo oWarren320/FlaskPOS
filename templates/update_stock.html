@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="flex h-screen">
+    <!-- Sidebar Section -->
+    <div class="w-64 bg-blue-800 text-white p-4 flex flex-col">
+        <h2 class="text-2xl font-semibold mb-6"></h2>
+        <ul class="space-y-4">
+            <li><a href="{{ url_for('cashier_dashboard') }}" class="hover:text-gray-300">Home</a></li>
+            <li><a href="{{ url_for('record_sale') }}" class="hover:text-gray-300">Record Sale</a></li>
+            <li><a href="{{ url_for('sales_reconciliation') }}" class="hover:text-gray-300">Sales</a></li>
+            <li><a href="{{ url_for('update_stock') }}" class="hover:text-gray-300">Update Stock</a></li>
+            <li><a href="{{ url_for('logout') }}" class="hover:text-gray-300">Logout</a></li>
+        </ul>
+    </div>
+
+    <!-- Form Section -->
+    <div class="w-3/4 bg-white p-6 border rounded-lg">
+        <h1 class="text-3xl mb-4">Update Stock</h1>
+        {% if success_message %}
+            <div class="bg-green-500 text-white p-4 mb-4 rounded">
+                {{ success_message }}
+            </div>
+        {% endif %}
+
+        <form method="POST" action="{{ url_for('update_stock') }}" class="space-y-4">
+            <!-- Product Selection -->
+            <div class="flex items-center space-x-4">
+                <label for="product_id" class="block w-1/4">Select Product</label>
+                <select name="product_id" id="product_id" class="border p-2 w-3/4">
+                    {% for product in products %}
+                        <option value="{{ product.id }}">{{ product.product_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- New Stock Quantity -->
+            <div class="flex items-center space-x-4">
+                <label for="stock" class="block w-1/4">New Stock Quantity</label>
+                <input type="number" name="stock" id="stock" class="border p-2 w-3/4" required>
+            </div>
+
+            <!-- Buying Price -->
+            <div class="flex items-center space-x-4">
+                <label for="buying_price" class="block w-1/4">Buying Price (KSH)</label>
+                <input type="number" name="buying_price" id="buying_price" class="border p-2 w-3/4" step="0.01" required>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="bg-blue-500 text-white p-2">Update Stock</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

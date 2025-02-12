@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="flex h-screen">
+
+    <!-- Sidebar Section -->
+    <aside class="w-64 bg-blue-800 text-white p-4 flex flex-col">
+        <h2 class="text-2xl font-semibold mb-6"></h2>
+        <ul class="space-y-4">
+            <li><a href="{{ url_for('cashier_dashboard') }}" class="hover:text-gray-300">Home</a></li>
+            <li><a href="{{ url_for('record_sale') }}" class="hover:text-gray-300">Record Sale</a></li>
+            <li><a href="{{ url_for('sales_reconciliation') }}" class="hover:text-gray-300">Sales</a></li>
+            <li><a href="{{ url_for('update_stock') }}" class="hover:text-gray-300">Update Stock</a></li>
+            <li><a href="{{ url_for('logout') }}" class="hover:text-gray-300">Logout</a></li>
+        </ul>
+    </aside>
+
+    <!-- Receipt Section -->
+    <div class="bg-white p-6 shadow-lg rounded-lg w-96 border border-gray-300">
+        <h2 class="text-center text-lg font-bold border-b pb-2 mb-4">SALE RECEIPT</h2>
+
+        <div class="text-sm font-mono">
+            <p><strong>Date:</strong> {{ now }}</p>
+            <p><strong>Payment Type:</strong> {{ payment_type }}</p>
+        </div>
+
+        <!-- Item List -->
+        <div class="border-t border-gray-300 mt-4 pt-2">
+            <h3 class="text-center font-bold mb-2">Items Purchased</h3>
+            <table class="w-full text-sm font-mono">
+                <thead>
+                    <tr>
+                        <th class="text-left">Item</th>
+                        <th class="text-right">Qty</th>
+                        <th class="text-right">Price</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in items %}
+                    <tr>
+                        <td>{{ item.name }}</td>
+                        <td class="text-right">{{ item.quantity }}</td>
+                        <td class="text-right">${{ item.price }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Total Price and Change -->
+        <div class="border-t mt-4 pt-2">
+            <p><strong>Total Price:</strong> KSH {{ total_price }}</p>
+            <p><strong>Change to Return:</strong> KSH {{ change }}</p>
+        </div>
+
+        <div class="border-t mt-4 pt-2 text-center">
+            <p class="text-xs italic">Thank you for your purchase!</p>
+        </div>
+
+        <!-- Print Button -->
+        <button onclick="window.print()" class="mt-4 bg-blue-500 text-white py-2 px-4 rounded w-full hover:bg-blue-700">
+            Print Receipt
+        </button>
+    </div>
+</div>
+{% endblock %}

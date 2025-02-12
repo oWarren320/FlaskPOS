@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+
+{% block title %}Approve Stock{% endblock %}
+
+{% block content %}
+<!-- Flash Messages -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <div id="message-container" class="alert alert-success">
+            {% for category, message in messages %}
+                <p class="{{ category }}">{{ message }}</p>
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endwith %}
+
+<div class="flex min-h-screen">
+    <!-- Sidebar -->
+    <div class="w-64 bg-blue-800 text-white p-4 flex flex-col">
+        <h2 class="text-2xl font-semibold mb-6">Admin Dashboard</h2>
+        <ul class="space-y-4">
+            <li><a href="{{ url_for('admin_dashboard') }}" class="hover:bg-blue-700 px-4 py-2 rounded block">Dashboard</a></li>
+            <li><a href="{{ url_for('manage_users') }}" class="hover:bg-blue-700 px-4 py-2 rounded block">Manage Users</a></li>
+            <li><a href="{{ url_for('view_stock') }}" class="hover:bg-blue-700 px-4 py-2 rounded block">View Stock</a></li>
+            <li><a href="{{ url_for('approve_stock') }}" class="hover:bg-blue-700 px-4 py-2 rounded block">Approve Stock</a></li>
+            <li><a href="{{ url_for('view_sales_report') }}" class="hover:bg-blue-700 px-4 py-2 rounded block">Sales Report</a></li>
+            <li><a href="{{ url_for('logout') }}" class="hover:bg-blue-700 px-4 py-2 rounded block">Logout</a></li>
+        </ul>
+    </div>
+
+    <!-- Main Content -->
+    <div class="w-full p-6">
+        <h1 class="text-3xl mb-4">Approve Stock Updates</h1>
+
+        {% if requests %}
+            <table class="min-w-full border border-gray-300">
+                <thead>
+                    <tr class="bg-gray-100">
+                        <th class="border p-2">Product Name</th>
+                        <th class="border p-2">Requested Stock</th>
+                        <th class="border p-2">Buying Price</th>
+                        <th class="border p-2">Requested By</th>
+                        <th class="border p-2">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for request in requests %}
+                        <tr>
+                            <td class="border p-2">{{ request.product.product_name if request.product else 'Unknown Product' }}</td>
+                            <td class="border p-2">{{ request.requested_stock }}</td>
+                            <td class="border p-2">KSH {{ request.product.buying_price }}</td>
+                            <td class="border p-2">{{ request.user.username }}</td>
+                            <td class="border p-2">
+                                <form class="approve-reject-form" method="POST">
+                                    <input type="hidden" name="request_id" value="{{ request.id }}">
+                                    <button type="submit" name="action" value="approve" class="bg-green-500 text-white px-4 py-2 rounded">Approve</button>
+                                    <button type="submit" name="action" value="reject" class="bg-red-500 text-white px-4 py-2 rounded">Reject</button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No pending stock update requests.</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- JavaScript for AJAX form submission -->
+<script>
+    $(document).ready(function() {
+        $(".approve-reject-form").submit(function(event) {
+            event.preventDefault();
+            let form = $(this);
+
+            $.ajax({
+                type: "POST",
+                url: "{{ url_for('approve_stock') }}",
+                data: form.serialize(),
+                dataType: "json",
+                success: function(response) {
+                    $("#message-container").html(`<div class="alert alert-success">${response.message}</div>`);
+                    form.closest("tr").remove();
+                },
+                error: function(xhr) {
+                    $("#message-container").html(`<div class="alert alert-danger">Error: ${xhr.responseJSON.message}</div>`);
+                }
+            });
+        });
+    });
+</script>
+
+<style>
+    .alert {
+        padding: 10px;
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+        margin-top: 10px;
+        border-radius: 5px;
+    }
+</style>
+{% endblock %}

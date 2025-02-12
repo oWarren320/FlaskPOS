@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Product{% endblock %}
+
+{% block content %}
+<!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div id="message-container" class="alert alert-success">
+                {% for category, message in messages %}
+                    <p class="{{ category }}">{{ message }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+<div class="flex">
+    <!-- Sidebar -->
+    <div class="w-64 bg-blue-800 text-white p-4 flex flex-col">
+        <h2 class="text-2xl font-semibold mb-6">Admin Dashboard</h2>
+        <ul class="space-y-4">
+            <li><a href="{{ url_for('admin_dashboard') }}" class="hover:bg-blue-700 px-4 py-2 rounded block">Dashboard</a></li>
+            <li><a href="{{ url_for('manage_users') }}" class="hover:bg-blue-700 px-4 py-2 rounded block">Manage Users</a></li>
+            <li><a href="{{ url_for('view_stock') }}" class="hover:bg-blue-700 px-4 py-2 rounded block">View Stock</a></li>
+            <li><a href="{{ url_for('approve_stock') }}" class="hover:bg-blue-700 px-4 py-2 rounded block">Approve Stock</a></li>
+            <li><a href="{{ url_for('view_sales_report') }}" class="hover:bg-blue-700 px-4 py-2 rounded block">Sales Report</a></li>
+            <li><a href="{{ url_for('logout') }}" class="hover:bg-blue-700 px-4 py-2 rounded block">Logout</a></li>
+        </ul>
+    </div>
+
+
+    <!-- Main Content -->
+    <div class="flex-1 p-6">
+        <h2 class="text-2xl font-semibold mb-4">Edit Product</h2>
+
+        <!-- Edit Product Form -->
+        <form action="{{ url_for('edit_product', product_id=product.id) }}" method="POST" class="mb-6">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div>
+                    <label for="product_name" class="block text-gray-700 font-medium">Product Name:</label>
+                    <input type="text" id="product_name" name="product_name" class="p-2 border rounded w-full" value="{{ product.product_name }}" required>
+                </div>
+
+                <div>
+                    <label for="buying_price" class="block text-gray-700 font-medium">Buying Price:</label>
+                    <input type="number" id="buying_price" name="buying_price" class="p-2 border rounded w-full" value="{{ product.buying_price }}" required>
+                </div>
+
+                <div>
+                    <label for="price" class="block text-gray-700 font-medium">Selling Price:</label>
+                    <input type="number" id="price" name="price" class="p-2 border rounded w-full" value="{{ product.price }}" required>
+                </div>
+            </div>
+
+            <button type="submit" class="mt-4 px-4 py-2 bg-blue-600 text-white rounded">Update Product</button>
+        </form>
+    </div>
+</div>
+
+<!-- JavaScript for AJAX form submission -->
+<script>
+    $(document).ready(function() {
+        $("#edit-product-form").submit(function(event) {
+            event.preventDefault();
+
+            $.ajax({
+                type: "POST",
+                url: window.location.href,
+                data: $(this).serialize(),
+                dataType: "json",
+                success: function(response) {
+                    $("#message-container").html(`<div class="alert alert-success">${response.message}</div>`);
+                },
+                error: function(xhr) {
+                    $("#message-container").html(`<div class="alert alert-danger">Error: ${xhr.responseJSON.message}</div>`);
+                }
+            });
+        });
+    });
+</script>
+
+<style>
+    .alert {
+        padding: 10px;
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+        margin-top: 10px;
+        border-radius: 5px;
+    }
+</style>
+{% endblock %}

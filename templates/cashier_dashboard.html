@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="flex h-screen">
+        <!-- Sidebar Section -->
+    <div class="w-64 bg-blue-800 text-white p-4 flex flex-col">
+        <h2 class="text-2xl font-semibold mb-6"></h2>
+        <ul class="space-y-4">
+            <li><a href="{{ url_for('cashier_dashboard') }}" class="hover:text-gray-300">Home</a></li>
+            <li><a href="{{ url_for('record_sale') }}" class="hover:text-gray-300">Record Sale</a></li>
+            <li><a href="{{ url_for('sales_reconciliation') }}" class="hover:text-gray-300">Sales</a></li>
+            <li><a href="{{ url_for('update_stock') }}" class="hover:text-gray-300">Update Stock</a></li>
+            <li><a href="{{ url_for('logout') }}" class="hover:text-gray-300">Logout</a></li>
+        </ul>
+    </div>
+
+        <!-- Main Content Section (Products Table) -->
+        <div class="w-3/4 p-4">
+            <h1 class="text-3xl mb-4">Products</h1>
+
+            <!-- Search Bar -->
+            <form method="GET" action="{{ url_for('cashier_dashboard') }}" class="mb-4">
+                <input type="text" name="search" placeholder="Search products..." class="border p-2 w-full md:w-1/2" value="{{ request.args.get('search') }}">
+                <button type="submit" class="bg-blue-500 text-white p-2 mt-2 w-full md:w-1/4">Search</button>
+            </form>
+
+            <!-- Table to display products -->
+            <table class="min-w-full border border-gray-300 mt-4">
+                <thead>
+                    <tr class="bg-gray-100">
+                        <th class="border p-2">Product Name</th>
+                        <th class="border p-2">Stock</th>
+                        <th class="border p-2">Price</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for product in products %}
+                        <tr>
+                            <td class="border p-2">{{ product.product_name }}</td>
+                            <td class="border p-2">{{ product.stock }}</td>
+                            <td class="border p-2">KSH {{ product.price }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}

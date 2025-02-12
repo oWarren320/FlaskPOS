@@ -1,0 +1,144 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Users{% endblock %}
+
+{% block content %}
+<div class="flex">
+    <!-- Sidebar -->
+    <div class="w-64 bg-blue-800 text-white p-4 flex flex-col">
+        <h2 class="text-2xl font-semibold mb-6">Admin Dashboard</h2>
+        <ul class="space-y-4">
+            <li><a href="{{ url_for('admin_dashboard') }}" class="hover:bg-blue-700 px-4 py-2 rounded block">Dashboard</a></li>
+            <li><a href="{{ url_for('manage_users') }}" class="hover:bg-blue-700 px-4 py-2 rounded block">Manage Users</a></li>
+            <li><a href="{{ url_for('view_stock') }}" class="hover:bg-blue-700 px-4 py-2 rounded block">View Stock</a></li>
+            <li><a href="{{ url_for('approve_stock') }}" class="hover:bg-blue-700 px-4 py-2 rounded block">Approve Stock</a></li>
+            <li><a href="{{ url_for('view_sales_report') }}" class="hover:bg-blue-700 px-4 py-2 rounded block">Sales Report</a></li>
+            <li><a href="{{ url_for('logout') }}" class="hover:bg-blue-700 px-4 py-2 rounded block">Logout</a></li>
+        </ul>
+    </div>
+
+    <!-- Main Content -->
+    <div class="flex-1 p-6">
+        <h2 class="text-2xl font-semibold mb-4">Manage Users</h2>
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=True) %}
+        {% if messages %}
+        <div>
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+
+        <!-- Add User Form -->
+        <form id="addUserForm" class="mb-6">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <input type="text" name="username" placeholder="Username" class="p-2 border rounded w-full" required>
+                <input type="password" name="pin" placeholder="PIN (6 digits)" class="p-2 border rounded w-full" required>
+                <select name="role" class="p-2 border rounded w-full">
+                    <option value="cashier">Cashier</option>
+                    <option value="admin">Admin</option>
+                </select>
+            </div>
+            <button type="submit" class="mt-4 px-4 py-2 bg-blue-600 text-white rounded">Add User</button>
+        </form>
+
+        <!-- User List -->
+        <table class="w-full bg-white border border-gray-300 rounded shadow-md">
+            <thead class="bg-gray-200">
+                <tr>
+                    <th class="px-4 py-2">Username</th>
+                    <th class="px-4 py-2">Role</th>
+                    <th class="px-4 py-2">Actions</th>
+                </tr>
+            </thead>
+            <tbody id="userTableBody">
+                {% for user in users %}
+                <tr class="border-t hover:bg-gray-100">
+                    <td class="px-4 py-2">{{ user.username }}</td>
+                    <td class="px-4 py-2">{{ user.role }}</td>
+                    <td class="px-4 py-2">
+                        <button onclick="deleteUser({{ user.id }}, '{{ user.username }}')" class="px-3 py-1 bg-red-600 text-white rounded">Delete</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    document.getElementById("addUserForm").addEventListener("submit", function(event) {
+        event.preventDefault();
+        const formData = new FormData(this);
+
+        fetch("{{ url_for('manage_users') }}", {
+            method: "POST",
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert(data.message);
+            if (data.success) {
+                location.reload();
+            }
+        })
+        .catch(error => console.error("Error:", error));
+    });
+
+    function deleteUser(userId, username) {
+        if (!confirm(`Are you sure you want to delete ${username}? This action cannot be undone.`)) {
+            return;
+        }
+
+        fetch(`/delete_user/${userId}`, {
+            method: "POST",
+            headers: {
+                "X-Requested-With": "XMLHttpRequest"
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert(data.message);
+            if (data.success) {
+                location.reload();
+            }
+        })
+        .catch(error => console.error("Error:", error));
+    }
+</script>
+
+<style>
+    .alert {
+        padding: 10px;
+        margin-top: 10px;
+        border-radius: 5px;
+    }
+
+    .alert-success {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+
+    .alert-danger {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+
+    .alert-warning {
+        background-color: #fff3cd;
+        color: #856404;
+        border: 1px solid #ffeeba;
+    }
+
+    .alert-info {
+        background-color: #d1ecf1;
+        color: #0c5460;
+        border: 1px solid #bee5eb;
+    }
+</style>
+{% endblock %}

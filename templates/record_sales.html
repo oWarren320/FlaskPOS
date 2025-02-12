@@ -1,0 +1,225 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="flex h-screen">
+    <!-- Sidebar Section -->
+    <aside class="w-64 bg-blue-800 text-white p-4 flex flex-col">
+        <h2 class="text-2xl font-semibold mb-6"></h2>
+        <ul class="space-y-4">
+            <li><a href="{{ url_for('cashier_dashboard') }}" class="hover:text-gray-300">Home</a></li>
+            <li><a href="{{ url_for('record_sale') }}" class="hover:text-gray-300">Record Sale</a></li>
+            <li><a href="{{ url_for('sales_reconciliation') }}" class="hover:text-gray-300">Sales</a></li>
+            <li><a href="{{ url_for('update_stock') }}" class="hover:text-gray-300">Update Stock</a></li>
+            <li><a href="{{ url_for('logout') }}" class="hover:text-gray-300">Logout</a></li>
+        </ul>
+    </aside>
+
+    <!-- Main Form Section -->
+    <main class="w-3/4 p-6">
+        <h1 class="text-3xl mb-4">Record Sale</h1>
+        <form method="POST" action="{{ url_for('record_sale') }}">
+
+            <!-- Sales Table -->
+            <table class="table-auto w-full border border-gray-300 mb-4" id="sale_table">
+                <thead>
+                    <tr class="bg-gray-100">
+                        <th class="border p-2">Product</th>
+                        <th class="border p-2">Quantity</th>
+                        <th class="border p-2">Price per Unit</th>
+                        <th class="border p-2">Total</th>
+                        <th class="border p-2"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="sale-row">
+                        <td class="border p-2">
+                            <select name="product_id[]" class="product_id border p-2 w-full" required>
+                                {% for product in products %}
+                                <option value="{{ product.id }}" data-price="{{ product.price }}">{{ product.product_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </td>
+                        <td class="border p-2">
+                            <input type="number" name="quantity[]" class="quantity border p-2 w-full" required min="1" value="1">
+                        </td>
+                        <td class="border p-2">
+                            <span class="unit_price">0.00</span>
+                        </td>
+                        <td class="border p-2">
+                            <span class="total_price">0.00</span>
+                        </td>
+                        <td class="border p-2">
+                            <button type="button" class="remove_row bg-red-500 text-white p-2">Remove</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <button type="button" id="add_row" class="bg-green-500 text-white p-2 mb-4">Add Row</button>
+
+            <!-- Payment Details -->
+            <div class="mb-4 flex flex-wrap items-center gap-4">
+                <div class="flex items-center">
+                    <label for="payment_type" class="font-semibold mr-2">Payment Type:</label>
+                    <select name="payment_type" id="payment_type" class="border p-2" required>
+                        <option value="Cash">Cash</option>
+                        <option value="M-Pesa">M-Pesa</option>
+                        <option value="Partial">Partial Payment</option>
+                    </select>
+                </div>
+
+                <!-- Single Amount Received -->
+                <div id="single_amount" class="flex items-center">
+                    <label for="amount_received" class="font-semibold mr-2">Amount Received:</label>
+                    <span>KES</span>
+                    <input type="number" name="amount_received" id="amount_received" class="border p-2 w-24" required>
+                </div>
+
+                <!-- Partial Payment Fields -->
+                <div id="partial_payment" class="hidden flex flex-wrap items-center gap-4">
+                    <div class="flex items-center">
+                        <label for="cash_received" class="font-semibold mr-2">Cash Received:</label>
+                        <span>KES</span>
+                        <input type="number" name="cash_received" id="cash_received" class="border p-2 w-24">
+                    </div>
+                    <div class="flex items-center">
+                        <label for="mpesa_received" class="font-semibold mr-2">M-Pesa Received:</label>
+                        <span>KES</span>
+                        <input type="number" name="mpesa_received" id="mpesa_received" class="border p-2 w-24">
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <p><strong>Grand Total:</strong> KSH <span id="grand_total">0.00</span></p>
+            </div>
+            <button type="submit" class="bg-blue-500 text-white p-2 mt-4">Record Sale</button>
+        </form>
+        {% if error %}
+        <p class="text-red-500">{{ error }}</p>
+        {% endif %}
+    </main>
+</div>
+
+<script>
+document.querySelector("form").addEventListener("submit", function (event) {
+    event.preventDefault();  // Prevent default form submission
+
+    const formData = new FormData(this);
+
+    // Convert amount fields to valid numbers before sending
+    formData.forEach((value, key) => {
+        if (key.includes("amount") || key.includes("received")) {
+            formData.set(key, value.trim() === "" ? "0" : value); // Replace empty values with 0
+        }
+    });
+
+    fetch(this.action, {
+        method: "POST",
+        body: formData
+    })
+    .then(response => response.json()) // Parse JSON response
+    .then(data => {
+        console.log("Response received:", data);  // Debugging
+
+        if (data.error) {
+            alert(data.error); // Show error alert
+        } else if (data.redirect) {
+            console.log("Redirecting to:", data.redirect);
+            window.location.href = data.redirect;  // Redirect to sales_reconciliation
+        } else {
+            console.error("No redirect URL found in response.");
+        }
+    })
+    .catch(error => {
+        console.error("Error:", error);
+    });
+});
+
+
+    document.getElementById('payment_type').addEventListener('change', function() {
+        const selectedPayment = this.value;
+        document.getElementById('single_amount').classList.toggle('hidden', selectedPayment === 'Partial');
+        document.getElementById('partial_payment').classList.toggle('hidden', selectedPayment !== 'Partial');
+
+        const singleAmountDiv = document.getElementById('single_amount');
+        const partialPaymentDiv = document.getElementById('partial_payment');
+        const amountReceived = document.getElementById('amount_received');
+        const cashReceived = document.getElementById('cash_received');
+        const mpesaReceived = document.getElementById('mpesa_received');
+
+        if (selectedPayment === 'Partial') {
+            // Show Partial Payment fields, Hide Single Amount
+            singleAmountDiv.classList.add('hidden');
+            partialPaymentDiv.classList.remove('hidden');
+
+            // Remove `required` from `amount_received` and add to partial fields
+            amountReceived.removeAttribute('required');
+            cashReceived.setAttribute('required', 'true');
+            mpesaReceived.setAttribute('required', 'true');
+        } else {
+            // Show Single Amount, Hide Partial Payment fields
+            singleAmountDiv.classList.remove('hidden');
+            partialPaymentDiv.classList.add('hidden');
+
+            // Add `required` back to `amount_received`, remove from partial fields
+            amountReceived.setAttribute('required', 'true');
+            cashReceived.removeAttribute('required');
+            mpesaReceived.removeAttribute('required');
+        }
+    });
+
+    document.addEventListener("DOMContentLoaded", function() {
+    const saleTable = document.getElementById("sale_table");
+    const addRowButton = document.getElementById("add_row");
+    const grandTotalSpan = document.getElementById("grand_total");
+
+    function updateRowPrice(row) {
+        const productSelect = row.querySelector(".product_id");
+        const quantityInput = row.querySelector(".quantity");
+        const unitPriceSpan = row.querySelector(".unit_price");
+        const totalPriceSpan = row.querySelector(".total_price");
+        const unitPrice = parseFloat(productSelect.selectedOptions[0].getAttribute("data-price")) || 0;
+        const quantity = parseInt(quantityInput.value) || 1;
+        const totalPrice = unitPrice * quantity;
+        unitPriceSpan.textContent = unitPrice.toFixed(2);
+        totalPriceSpan.textContent = totalPrice.toFixed(2);
+        updateGrandTotal();
+    }
+
+    function updateGrandTotal() {
+        let grandTotal = 0;
+        document.querySelectorAll(".total_price").forEach(span => {
+            grandTotal += parseFloat(span.textContent) || 0;
+        });
+        grandTotalSpan.textContent = grandTotal.toFixed(2);
+    }
+
+    saleTable.addEventListener("change", e => {
+        if (e.target.matches(".product_id, .quantity")) {
+            updateRowPrice(e.target.closest("tr"));
+        }
+    });
+
+    addRowButton.addEventListener("click", () => {
+        const newRow = saleTable.querySelector(".sale-row").cloneNode(true);
+        saleTable.querySelector("tbody").appendChild(newRow);
+        newRow.querySelector(".quantity").value = 1;
+        updateRowPrice(newRow);
+    });
+
+    saleTable.addEventListener("click", e => {
+        if (e.target.matches(".remove_row")) {
+            e.target.closest("tr").remove();
+            updateGrandTotal();
+        }
+    });
+
+    // Ensure first row has correct values on reload
+    document.querySelectorAll(".sale-row").forEach(row => {
+        updateRowPrice(row);
+    });
+
+    updateGrandTotal();
+});
+
+</script>
+{% endblock %}

@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="flex min-h-screen">
+    <!-- Sidebar -->
+    <div class="w-64 bg-blue-800 text-white p-4 flex flex-col">
+        <h2 class="text-2xl font-semibold mb-6">Admin Dashboard</h2>
+        <ul class="space-y-4">
+            <li><a href="{{ url_for('admin_dashboard') }}" class="hover:bg-blue-700 px-4 py-2 rounded block">Dashboard</a></li>
+            <li><a href="{{ url_for('manage_users') }}" class="hover:bg-blue-700 px-4 py-2 rounded block">Manage Users</a></li>
+            <li><a href="{{ url_for('view_stock') }}" class="hover:bg-blue-700 px-4 py-2 rounded block">View Stock</a></li>
+            <li><a href="{{ url_for('approve_stock') }}" class="hover:bg-blue-700 px-4 py-2 rounded block">Approve Stock</a></li>
+            <li><a href="{{ url_for('view_sales_report') }}" class="hover:bg-blue-700 px-4 py-2 rounded block">Sales Report</a></li>
+            <li><a href="{{ url_for('logout') }}" class="hover:bg-blue-700 px-4 py-2 rounded block">Logout</a></li>
+        </ul>
+    </div>
+
+
+    <!-- Main Content -->
+    <div class="flex-1 p-6">
+        <h1 class="text-3xl font-semibold mb-4">Welcome, Admin!</h1>
+
+        <!-- Quick Stats Section -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mb-8">
+            <div class="bg-white p-6 rounded shadow-md">
+                <h2 class="text-xl font-semibold mb-2">Total Sales</h2>
+                <p class="text-3xl font-bold text-blue-600">KSH {{ total_sales }}</p>
+            </div>
+            <div class="bg-white p-6 rounded shadow-md">
+                <h2 class="text-xl font-semibold mb-2">Total Stock</h2>
+                <p class="text-3xl font-bold text-blue-600">{{ total_stock }} items</p>
+            </div>
+            <div class="bg-white p-6 rounded shadow-md">
+                <h2 class="text-xl font-semibold mb-2">Users</h2>
+                <p class="text-3xl font-bold text-blue-600">{{ total_users }}</p>
+            </div>
+        </div>
+
+        <!-- Actions Section -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div class="bg-white p-6 rounded shadow-md">
+                <h2 class="text-xl font-semibold mb-2">Manage Products</h2>
+                <p>View and update the stock levels for products.</p>
+                <a href="{{ url_for('view_stock') }}" class="text-blue-500 hover:text-blue-700">Manage Stock</a>
+            </div>
+            <div class="bg-white p-6 rounded shadow-md">
+                <h2 class="text-xl font-semibold mb-2">Manage Users</h2>
+                <p>Add, remove, or edit users.</p>
+                <a href="{{ url_for('manage_users') }}" class="text-blue-500 hover:text-blue-700">Manage Users</a>
+            </div>
+            <div class="bg-white p-6 rounded shadow-md">
+                <h2 class="text-xl font-semibold mb-2">Sales Reports</h2>
+                <p>View daily and historical sales reports.</p>
+                <a href="{{ url_for('view_sales_report') }}" class="text-blue-500 hover:text-blue-700">View Report</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
